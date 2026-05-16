@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
+import logoImg from '../../public/dengeli-logo.png'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -36,7 +37,7 @@ export default function RegisterPage() {
     <main className="auth-page">
       <div className="auth-card">
         <div className="auth-logo">
-          <img src="/dengeli-logo.png" alt="Logo" width="56" height="56" className="auth-logo-icon" style={{ background: 'transparent', boxShadow: 'none' }} />
+          <img src={logoImg.src} alt="Logo" width="56" height="56" className="auth-logo-icon" style={{ background: 'transparent', boxShadow: 'none' }} />
           <h1 className="auth-title">DengeliDuyum'a Katılın</h1>
           <p className="auth-subtitle">Odyoloji ve Vestibüler Klinik</p>
         </div>

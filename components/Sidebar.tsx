@@ -1,6 +1,7 @@
 'use client'
 import Link from 'next/link'
 import Image from 'next/image'
+import logoImg from '../public/dengeli-logo.png'
 import { usePathname, useRouter } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
 
@@ -21,7 +22,7 @@ export default function Sidebar({ navItems, roleLabel }: SidebarProps) {
     <aside className="sidebar">
       <div className="sidebar-logo">
         <div className="logo-mark">
-          <img src="/dengeli-logo.png" alt="Logo" width="36" height="36" className="logo-img" />
+          <img src={logoImg.src} alt="Logo" width="36" height="36" className="logo-img" />
           <div>
             <div className="logo-text">DengeliDuyum</div>
             <div className="logo-sub">{roleLabel} Paneli</div>

@@ -32,9 +32,9 @@ export async function DELETE(req: NextRequest) {
     await db.delete(clinics).where(eq(clinics.id, id))
     return NextResponse.json({ success: true })
   } catch (e: any) {
-    if (e.message?.includes('FOREIGN KEY') || e.message?.includes('foreign key')) {
-      return NextResponse.json({ error: 'Bu kliniğe bağlı doktor veya randevular bulunduğu için silinemez. Önce onlara ait kayıtları silmelisiniz.' }, { status: 400 })
+    if (e.message?.includes('FOREIGN KEY') || e.message?.includes('foreign key') || e.code === 'SQLITE_CONSTRAINT_FOREIGNKEY') {
+      return NextResponse.json({ error: 'Bu kliniğe bağlı doktor, hasta veya randevular bulunduğu için silinemez. Önce onlara ait kayıtları silmelisiniz.' }, { status: 400 })
     }
-    return NextResponse.json({ error: 'Silinirken bir hata oluştu' }, { status: 500 })
+    return NextResponse.json({ error: 'Silinirken bir hata oluştu: ' + (e.message || String(e)) }, { status: 500 })
   }
 }
