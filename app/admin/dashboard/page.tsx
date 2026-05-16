@@ -4,8 +4,6 @@ import Link from 'next/link'
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({ users: 0, doctors: 0, clinics: 0, appointments: 0 })
-  const [seeded, setSeeded] = useState(false)
-  const [seeding, setSeeding] = useState(false)
 
   useEffect(() => {
     Promise.all([
@@ -21,15 +19,9 @@ export default function AdminDashboard() {
         appointments: Array.isArray(a) ? a.length : 0,
       })
     })
-  }, [seeded])
-
-  async function handleSeed() {
-    setSeeding(true)
-    await fetch('/api/seed')
-    setSeeded(s => !s)
-    setSeeding(false)
-    alert('Seed tamamlandı! Giriş bilgileri:\nAdmin: admin@anamnez.com / admin123\nDoktor: doktor1@anamnez.com / doktor123\nHasta: hasta@anamnez.com / hasta123')
-  }
+      })
+    })
+  }, [])
 
   return (
     <>
@@ -39,9 +31,6 @@ export default function AdminDashboard() {
             <h1 className="page-title">Yönetim Paneli</h1>
             <p className="page-subtitle">Sistem genelindeki istatistikler ve hızlı erişim</p>
           </div>
-          <button className="btn btn-secondary btn-sm" onClick={handleSeed} disabled={seeding}>
-            {seeding ? 'Yükleniyor…' : '🌱 Test Verisi Yükle'}
-          </button>
         </div>
       </div>
       <div className="page-body">
@@ -64,6 +53,7 @@ export default function AdminDashboard() {
           {[
             { href: '/admin/doktorlar', icon: '👨‍⚕️', title: 'Doktor Yönetimi', desc: 'Yeni doktor ekle, mevcut doktorları görüntüle.' },
             { href: '/admin/klinikler', icon: '🏥', title: 'Klinik Yönetimi', desc: 'Şube ekle, düzenle, sil.' },
+            { href: '/admin/hastalar', icon: '🧑‍🤝‍🧑', title: 'Hasta Listesi', desc: 'Sisteme kayıtlı hastaları görüntüle.' },
             { href: '/admin/randevular', icon: '📅', title: 'Tüm Randevular', desc: 'Sistem genelindeki tüm randevuları görüntüle.' },
           ].map(item => (
             <Link key={item.href} href={item.href} className="card" style={{ textDecoration: 'none', display: 'block', transition: 'box-shadow 0.15s' }}
