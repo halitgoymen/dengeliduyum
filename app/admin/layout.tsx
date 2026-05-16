@@ -3,9 +3,10 @@ import Sidebar from '@/components/Sidebar'
 const NAV = [
   { label: 'Genel Bakış', href: '/admin/dashboard', icon: '📊' },
   { label: 'Doktorlar', href: '/admin/doktorlar', icon: '👨‍⚕️' },
-  { label: 'Hastalar', href: '/admin/hastalar', icon: '🧑‍🤝‍🧑' },
+  { label: 'Kullanıcılar', href: '/admin/kullanicilar', icon: '🧑‍🤝‍🧑' },
   { label: 'Klinikler', href: '/admin/klinikler', icon: '🏥' },
   { label: 'Tüm Randevular', href: '/admin/randevular', icon: '📅' },
+  { label: 'Sistem Logları', href: '/admin/loglar', icon: '📋' },
 ]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
