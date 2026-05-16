@@ -19,8 +19,6 @@ export default function AdminDashboard() {
         appointments: Array.isArray(a) ? a.length : 0,
       })
     })
-      })
-    })
   }, [])
 
   return (
