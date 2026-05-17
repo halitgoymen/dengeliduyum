@@ -117,24 +117,51 @@ export default function RandevuDetay() {
               <p className="text-muted" style={{ padding: '10px 0' }}>Doldurulmuş form sorusu bulunmuyor.</p>
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 16 }}>
-                {getQuestionsFor(data.anamnez.reason, data.anamnez.ageGroup).map((q, idx) => {
-                  let answer;
-                  try {
-                    const parsedForm = typeof data.anamnez.formData === 'string' ? JSON.parse(data.anamnez.formData) : data.anamnez.formData;
-                    answer = parsedForm[q.id];
-                  } catch(e) { answer = null }
-                  if (!answer) return null
-                  return (
-                    <div key={q.id}>
+                {(() => {
+                  const qList = (data.anamnez.questions && data.anamnez.questions.length > 0)
+                    ? data.anamnez.questions.map((q: any) => ({ id: q.id, text: q.soru }))
+                    : getQuestionsFor(data.anamnez.reason, data.anamnez.ageGroup);
+
+                  const answeredQuestions = qList.map((q: any) => {
+                    let answer;
+                    try {
+                      const parsedForm = typeof data.anamnez.formData === 'string' ? JSON.parse(data.anamnez.formData) : data.anamnez.formData;
+                      answer = parsedForm[q.id];
+                    } catch(e) { answer = null }
+                    return { q, answer };
+                  }).filter(item => item.answer);
+
+                  if (answeredQuestions.length === 0) {
+                    // Eger qList icinde bulamadikysa (mesela farkli karisik durumlar)
+                    // formData icindeki ham ID ve cevaplari doğrudan yazdiralim
+                    let parsedForm: Record<string, string> = {};
+                    try {
+                      parsedForm = typeof data.anamnez.formData === 'string' ? JSON.parse(data.anamnez.formData) : data.anamnez.formData;
+                    } catch(e) {}
+                    
+                    return Object.entries(parsedForm).map(([qId, ans], idx) => (
+                      <div key={qId}>
+                        <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-3)', marginBottom: 6 }}>
+                          Soru ID: {qId}
+                        </div>
+                        <div style={{ fontSize: '0.875rem', color: 'var(--text)', background: 'var(--surface)', padding: '10px 14px', borderRadius: 8, lineHeight: 1.6 }}>
+                          {ans}
+                        </div>
+                      </div>
+                    ));
+                  }
+
+                  return answeredQuestions.map((item, idx) => (
+                    <div key={item.q.id}>
                       <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-3)', marginBottom: 6 }}>
-                        {idx + 1}. {q.text}
+                        {idx + 1}. {item.q.text}
                       </div>
                       <div style={{ fontSize: '0.875rem', color: 'var(--text)', background: 'var(--surface)', padding: '10px 14px', borderRadius: 8, lineHeight: 1.6 }}>
-                        {answer}
+                        {item.answer}
                       </div>
                     </div>
-                  )
-                })}
+                  ));
+                })()}
               </div>
             )}
           </div>

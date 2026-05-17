@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { db } from '@/lib/db'
-import { appointments, anamnezForms, doctors, users } from '@/lib/schema'
-import { eq } from 'drizzle-orm'
+import { eq, inArray } from 'drizzle-orm'
+import { appointments, anamnezForms, doctors, users, anamnezSorulari } from '@/lib/schema'
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
@@ -14,6 +14,24 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   if (!appt) return NextResponse.json({ error: 'Bulunamadı' }, { status: 404 })
 
   const anamnez = await db.select().from(anamnezForms).where(eq(anamnezForms.appointmentId, id)).get()
+  
+  let questions: any[] = []
+  if (anamnez) {
+    let parsedForm: Record<string, string> = {}
+    try {
+      parsedForm = typeof anamnez.formData === 'string' ? JSON.parse(anamnez.formData) : anamnez.formData
+    } catch (e) {}
+
+    const questionIds = Object.keys(parsedForm || {})
+    if (questionIds.length > 0) {
+      questions = await db
+        .select({ id: anamnezSorulari.id, soru: anamnezSorulari.soru })
+        .from(anamnezSorulari)
+        .where(inArray(anamnezSorulari.id, questionIds))
+        .all()
+    }
+  }
+
   const patient = await db.select({ fullName: users.fullName, email: users.email, phone: users.phone }).from(users).where(eq(users.id, appt.patientId)).get()
   const doctor = await db
     .select({ fullName: users.fullName, title: doctors.title })
@@ -22,7 +40,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     .where(eq(doctors.id, appt.doctorId))
     .get()
 
-  return NextResponse.json({ ...appt, anamnez, patient, doctor })
+  const responseAnamnez = anamnez ? { ...anamnez, questions } : null
+
+  return NextResponse.json({ ...appt, anamnez: responseAnamnez, patient, doctor })
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
