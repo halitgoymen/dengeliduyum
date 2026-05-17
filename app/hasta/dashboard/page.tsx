@@ -17,6 +17,16 @@ const STEPS: { id: Step; label: string }[] = [
 
 const STEP_ORDER: Step[] = ['klinik', 'neden', 'yas', 'doktor', 'tarih', 'anamnez', 'onay']
 
+type DBSoru = {
+  id: string
+  soru: string
+  secenekler: string[]
+  yasGrubu: string
+  sira: number
+}
+
+type Question = { id: string; text: string; options: string[]; type: string }
+
 export default function HastaDashboard() {
   const router = useRouter()
   const [step, setStep] = useState<Step>('klinik')
@@ -31,11 +41,33 @@ export default function HastaDashboard() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+  // DB'den gelen sorular (admin tarafından yönetilen)
+  const [dbQuestions, setDbQuestions] = useState<Question[] | null>(null)
+  const [questionsLoading, setQuestionsLoading] = useState(false)
+
   useEffect(() => { fetch('/api/clinics').then(r => r.json()).then(setClinics) }, [])
   useEffect(() => {
     if (!sel.clinicId) return
     fetch(`/api/doctors?clinicId=${sel.clinicId}`).then(r => r.json()).then(setDoctors)
   }, [sel.clinicId])
+
+  // Anamnez adımına geçince DB'den soruları çek
+  useEffect(() => {
+    if (step !== 'anamnez' || !sel.reason || !sel.ageGroup) return
+    setQuestionsLoading(true)
+    setDbQuestions(null)
+    fetch(`/api/anamnez-sorulari?kategori=${encodeURIComponent(sel.reason)}&yasGrubu=${encodeURIComponent(sel.ageGroup)}`)
+      .then(r => r.json())
+      .then((data: DBSoru[]) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setDbQuestions(data.map(s => ({ id: s.id, text: s.soru, options: s.secenekler, type: 'radio' })))
+        } else {
+          setDbQuestions(null) // fallback: statik sorular kullan
+        }
+      })
+      .catch(() => setDbQuestions(null))
+      .finally(() => setQuestionsLoading(false))
+  }, [step, sel.reason, sel.ageGroup])
 
   function next() { setStep(STEP_ORDER[stepIdx + 1]) }
   function back() { setStep(STEP_ORDER[stepIdx - 1]) }
@@ -64,7 +96,9 @@ export default function HastaDashboard() {
   const selClinic = clinics.find(c => c.id === sel.clinicId)
   const selDoctor = doctors.find(d => d.id === sel.doctorId)
 
-  const questions = getQuestionsFor(sel.reason, sel.ageGroup)
+  // DB'den sorular geldiyse onları kullan, yoksa statik fallback
+  const staticQuestions = getQuestionsFor(sel.reason, sel.ageGroup)
+  const questions = dbQuestions !== null ? dbQuestions : staticQuestions
 
   return (
     <>
@@ -173,7 +207,9 @@ export default function HastaDashboard() {
           {step === 'anamnez' && (
             <div>
               <h2 style={{ marginBottom: 16 }}>Anamnez Formu</h2>
-              {questions.length === 0 ? (
+              {questionsLoading ? (
+                <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-3)' }}>⏳ Sorular yükleniyor…</div>
+              ) : questions.length === 0 ? (
                 <p className="text-muted">Bu seçim için ek soru bulunmamaktadır.</p>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -194,7 +230,7 @@ export default function HastaDashboard() {
               )}
               <div style={{ display: 'flex', gap: 10, marginTop: 24 }}>
                 <button className="btn btn-secondary" onClick={back}>Geri</button>
-                <button className="btn btn-primary" onClick={next} disabled={questions.length > 0 && Object.keys(formData).length < questions.length}>Devam Et</button>
+                <button className="btn btn-primary" onClick={next} disabled={questionsLoading || (questions.length > 0 && Object.keys(formData).length < questions.length)}>Devam Et</button>
               </div>
             </div>
           )}

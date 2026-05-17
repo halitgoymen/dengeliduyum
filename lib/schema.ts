@@ -45,3 +45,16 @@ export const anamnezForms = sqliteTable('anamnez_forms', {
   formData: text('form_data', { mode: 'json' }).notNull(), // Sorular ve cevaplar JSON olarak tutulacak
   createdAt: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
 })
+
+// Admin tarafından yönetilen anamnez soruları
+export const anamnezSorulari = sqliteTable('anamnez_sorulari', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  kategori: text('kategori').notNull(), // 'İşitme azlığı/ kaybı', 'Çınlama (Tinnitus) Terapisi', vb.
+  yasGrubu: text('yas_grubu').notNull().default('tum'), // '0-18 yaş', '18-65 yaş', '65 yaş ve üzeri', 'tum'
+  soru: text('soru').notNull(),
+  secenekler: text('secenekler', { mode: 'json' }).notNull(), // string[] olarak
+  sira: integer('sira').notNull().default(0),
+  aktif: integer('aktif', { mode: 'boolean' }).notNull().default(true),
+  createdAt: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
+  updatedAt: text('updated_at').notNull().$defaultFn(() => new Date().toISOString()),
+})

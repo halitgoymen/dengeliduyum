@@ -53,6 +53,7 @@ export default function AdminDashboard() {
             { href: '/admin/klinikler', icon: '🏥', title: 'Klinik Yönetimi', desc: 'Şube ekle, düzenle, sil.' },
             { href: '/admin/kullanicilar', icon: '🧑‍🤝‍🧑', title: 'Tüm Kullanıcılar', desc: 'Sisteme kayıtlı admin, doktor ve hastaları görüntüle.' },
             { href: '/admin/randevular', icon: '📅', title: 'Tüm Randevular', desc: 'Sistem genelindeki tüm randevuları görüntüle.' },
+            { href: '/admin/anamnez-sorulari', icon: '📝', title: 'Anamnez Soruları', desc: 'Randevu formunda çıkan anamnez sorularını ekle, düzenle veya pasif yap.' },
             { href: '/admin/loglar', icon: '📋', title: 'Sistem Logları', desc: 'Son olayları ve aktiviteleri incele.' },
           ].map(item => (
             <Link key={item.href} href={item.href} className="card" style={{ textDecoration: 'none', display: 'block', transition: 'box-shadow 0.15s' }}

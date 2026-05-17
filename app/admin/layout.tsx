@@ -6,6 +6,7 @@ const NAV = [
   { label: 'Kullanıcılar', href: '/admin/kullanicilar', icon: '🧑‍🤝‍🧑' },
   { label: 'Klinikler', href: '/admin/klinikler', icon: '🏥' },
   { label: 'Tüm Randevular', href: '/admin/randevular', icon: '📅' },
+  { label: 'Anamnez Soruları', href: '/admin/anamnez-sorulari', icon: '📝' },
   { label: 'Sistem Logları', href: '/admin/loglar', icon: '📋' },
 ]
 
