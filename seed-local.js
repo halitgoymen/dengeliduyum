@@ -3,8 +3,7 @@ require('dotenv').config({ path: '.env.local' });
 const crypto = require('crypto');
 
 const client = createClient({ 
-  url: process.env.DATABASE_URL,
-  authToken: process.env.DATABASE_AUTH_TOKEN
+  url: 'file:local.db'
 });
 
 const sorular = [
