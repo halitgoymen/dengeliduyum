@@ -76,20 +76,41 @@ export default function HastaDashboard() {
       .then(r => r.json())
       .then((data: DBSoru[]) => {
         if (Array.isArray(data)) {
-          setDbQuestions(data.map(s => ({ 
-            id: s.id, 
-            text: s.soru, 
-            options: s.secenekler, 
-            type: 'radio',
-            bagliSoruId: s.bagliSoruId,
-            bagliCevap: s.bagliCevap,
-            uyariMesaji: s.uyariMesaji ? JSON.parse(s.uyariMesaji) : null
-          })))
+          setDbQuestions(data.map(s => {
+            let optionsArray: string[] = []
+            if (Array.isArray(s.secenekler)) {
+              optionsArray = s.secenekler
+            } else if (typeof s.secenekler === 'string') {
+              try { optionsArray = JSON.parse(s.secenekler) } catch { optionsArray = [] }
+            }
+
+            let warningsObj: Record<string, string> | null = null
+            if (s.uyariMesaji) {
+              if (typeof s.uyariMesaji === 'object') {
+                warningsObj = s.uyariMesaji as unknown as Record<string, string>
+              } else if (typeof s.uyariMesaji === 'string') {
+                try { warningsObj = JSON.parse(s.uyariMesaji) } catch { warningsObj = null }
+              }
+            }
+
+            return {
+              id: s.id,
+              text: s.soru,
+              options: optionsArray,
+              type: 'radio',
+              bagliSoruId: s.bagliSoruId,
+              bagliCevap: s.bagliCevap,
+              uyariMesaji: warningsObj
+            }
+          }))
         } else {
           setDbQuestions([])
         }
       })
-      .catch(() => setDbQuestions([]))
+      .catch((err) => {
+        console.error("Fetch questions error:", err)
+        setDbQuestions([])
+      })
       .finally(() => setQuestionsLoading(false))
   }, [step, sel.reason, sel.ageGroup, sel.hastaTipi])
 
