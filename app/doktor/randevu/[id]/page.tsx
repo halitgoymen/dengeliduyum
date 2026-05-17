@@ -129,7 +129,7 @@ export default function RandevuDetay() {
                       answer = parsedForm[q.id];
                     } catch(e) { answer = null }
                     return { q, answer };
-                  }).filter(item => item.answer);
+                  }).filter((item: any) => item.answer);
 
                   if (answeredQuestions.length === 0) {
                     // Eger qList icinde bulamadikysa (mesela farkli karisik durumlar)
@@ -151,7 +151,7 @@ export default function RandevuDetay() {
                     ));
                   }
 
-                  return answeredQuestions.map((item, idx) => (
+                  return answeredQuestions.map((item: any, idx: number) => (
                     <div key={item.q.id}>
                       <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-3)', marginBottom: 6 }}>
                         {idx + 1}. {item.q.text}
