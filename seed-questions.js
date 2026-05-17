@@ -1,5 +1,9 @@
 const { createClient } = require('@libsql/client');
-const client = createClient({ url: 'file:local.db' });
+require('dotenv').config({ path: '.env.local' });
+const client = createClient({ 
+  url: process.env.DATABASE_URL,
+  authToken: process.env.DATABASE_AUTH_TOKEN
+});
 const crypto = require('crypto');
 
 const questions = [

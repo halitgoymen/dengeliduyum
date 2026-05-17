@@ -5,16 +5,21 @@ import { anamnezSorulari } from '@/lib/schema'
 import { eq, asc } from 'drizzle-orm'
 
 export async function GET() {
-  const session = await auth()
-  if (!session || session.user.role !== 'admin')
-    return NextResponse.json({ error: 'Yetkisiz' }, { status: 401 })
+  try {
+    const session = await auth()
+    if (!session || session.user.role !== 'admin')
+      return NextResponse.json({ error: 'Yetkisiz' }, { status: 401 })
 
-  const data = await db
-    .select()
-    .from(anamnezSorulari)
-    .orderBy(asc(anamnezSorulari.kategori), asc(anamnezSorulari.sira))
+    const data = await db
+      .select()
+      .from(anamnezSorulari)
+      .orderBy(asc(anamnezSorulari.kategori), asc(anamnezSorulari.sira))
 
-  return NextResponse.json(data)
+    return NextResponse.json(data)
+  } catch (e) {
+    console.error("GET ERROR:", e)
+    return NextResponse.json({ error: 'Sunucu hatası (GET).', details: String(e) }, { status: 500 })
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -23,7 +28,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Yetkisiz' }, { status: 401 })
 
   try {
-    const { kategori, yasGrubu, soru, secenekler, sira, aktif } = await req.json()
+    const { kategori, yasGrubu, hastaTipi, soru, secenekler, bagliSoruId, bagliCevap, uyariMesaji, sira, aktif } = await req.json()
 
     if (!kategori || !soru || !Array.isArray(secenekler) || secenekler.length === 0)
       return NextResponse.json({ error: 'Kategori, soru ve en az bir seçenek zorunludur.' }, { status: 400 })
@@ -33,8 +38,12 @@ export async function POST(req: NextRequest) {
       .values({
         kategori,
         yasGrubu: yasGrubu || 'tum',
+        hastaTipi: hastaTipi || 'tum',
         soru,
         secenekler,
+        bagliSoruId: bagliSoruId || null,
+        bagliCevap: bagliCevap || null,
+        uyariMesaji: uyariMesaji || null,
         sira: sira ?? 0,
         aktif: aktif !== false,
         createdAt: new Date().toISOString(),
@@ -58,7 +67,7 @@ export async function PUT(req: NextRequest) {
   if (!id) return NextResponse.json({ error: 'id gerekli' }, { status: 400 })
 
   try {
-    const { kategori, yasGrubu, soru, secenekler, sira, aktif } = await req.json()
+    const { kategori, yasGrubu, hastaTipi, soru, secenekler, bagliSoruId, bagliCevap, uyariMesaji, sira, aktif } = await req.json()
 
     if (!kategori || !soru || !Array.isArray(secenekler) || secenekler.length === 0)
       return NextResponse.json({ error: 'Kategori, soru ve en az bir seçenek zorunludur.' }, { status: 400 })
@@ -68,8 +77,12 @@ export async function PUT(req: NextRequest) {
       .set({
         kategori,
         yasGrubu: yasGrubu || 'tum',
+        hastaTipi: hastaTipi || 'tum',
         soru,
         secenekler,
+        bagliSoruId: bagliSoruId || null,
+        bagliCevap: bagliCevap || null,
+        uyariMesaji: uyariMesaji || null,
         sira: sira ?? 0,
         aktif: aktif !== false,
         updatedAt: new Date().toISOString(),
@@ -97,7 +110,7 @@ export async function DELETE(req: NextRequest) {
     await db.delete(anamnezSorulari).where(eq(anamnezSorulari.id, id))
     return NextResponse.json({ success: true })
   } catch (e) {
-    console.error(e)
-    return NextResponse.json({ error: 'Silinirken hata oluştu.' }, { status: 500 })
+    console.error("DELETE ERROR:", e)
+    return NextResponse.json({ error: 'Silinirken hata oluştu.', details: String(e) }, { status: 500 })
   }
 }

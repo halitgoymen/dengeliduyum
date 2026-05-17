@@ -51,8 +51,12 @@ export const anamnezSorulari = sqliteTable('anamnez_sorulari', {
   id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
   kategori: text('kategori').notNull(), // 'İşitme azlığı/ kaybı', 'Çınlama (Tinnitus) Terapisi', vb.
   yasGrubu: text('yas_grubu').notNull().default('tum'), // '0-18 yaş', '18-65 yaş', '65 yaş ve üzeri', 'tum'
+  hastaTipi: text('hasta_tipi').notNull().default('tum'), // 'yeni', 'takipli', 'tum'
   soru: text('soru').notNull(),
   secenekler: text('secenekler', { mode: 'json' }).notNull(), // string[] olarak
+  bagliSoruId: text('bagli_soru_id'), // Hangi soruya bağlı? (ID)
+  bagliCevap: text('bagli_cevap'), // O sorunun hangi cevabında bu soru çıksın? (Tam metin)
+  uyariMesaji: text('uyari_mesaji', { mode: 'json' }), // Record<string, string> (cevap -> uyarı mesajı)
   sira: integer('sira').notNull().default(0),
   aktif: integer('aktif', { mode: 'boolean' }).notNull().default(true),
   createdAt: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),

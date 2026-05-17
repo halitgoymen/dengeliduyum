@@ -25,6 +25,10 @@ type Soru = {
   sira: number
   aktif: boolean
   createdAt: string
+  hastaTipi?: string
+  bagliSoruId?: string | null
+  bagliCevap?: string | null
+  uyariMesaji?: string | null
 }
 
 const EMPTY_FORM = {
@@ -35,6 +39,10 @@ const EMPTY_FORM = {
   secenekler: ['', ''],
   sira: 0,
   aktif: true,
+  hastaTipi: 'tum',
+  bagliSoruId: '',
+  bagliCevap: '',
+  uyariMesaji: '',
 }
 
 export default function AnamnezSorulariPage() {
@@ -55,9 +63,10 @@ export default function AnamnezSorulariPage() {
     try {
       const res = await fetch('/api/admin/anamnez-sorulari')
       const data = await res.json()
+      if (!res.ok) throw new Error(data.error + (data.details ? ` (${data.details})` : ''))
       setSorular(Array.isArray(data) ? data : [])
-    } catch {
-      setError('Sorular yüklenemedi.')
+    } catch (e: any) {
+      setError(e.message || 'Sorular yüklenemedi.')
     } finally {
       setLoading(false)
     }
@@ -82,6 +91,10 @@ export default function AnamnezSorulariPage() {
       secenekler: [...s.secenekler],
       sira: s.sira,
       aktif: s.aktif,
+      hastaTipi: s.hastaTipi || 'tum',
+      bagliSoruId: s.bagliSoruId || '',
+      bagliCevap: s.bagliCevap || '',
+      uyariMesaji: s.uyariMesaji || '',
     })
     setEditingId(s.id)
     setShowForm(true)
@@ -126,6 +139,10 @@ export default function AnamnezSorulariPage() {
         secenekler: cleanSecenekler,
         sira: Number(form.sira) || 0,
         aktif: form.aktif,
+        hastaTipi: form.hastaTipi,
+        bagliSoruId: form.bagliSoruId || null,
+        bagliCevap: form.bagliCevap || null,
+        uyariMesaji: form.uyariMesaji || null,
       }
 
       let res: Response
@@ -144,7 +161,7 @@ export default function AnamnezSorulariPage() {
       }
 
       const data = await res.json()
-      if (!res.ok) { setError(data.error || 'Hata oluştu.'); return }
+      if (!res.ok) { setError(data.error + (data.details ? ` \nDetay: ${data.details}` : '')); return }
 
       setSuccess(editingId ? 'Soru güncellendi.' : 'Yeni soru eklendi.')
       closeForm()
@@ -177,6 +194,10 @@ export default function AnamnezSorulariPage() {
         secenekler: s.secenekler,
         sira: s.sira,
         aktif: !s.aktif,
+        hastaTipi: s.hastaTipi,
+        bagliSoruId: s.bagliSoruId,
+        bagliCevap: s.bagliCevap,
+        uyariMesaji: s.uyariMesaji,
       }),
     })
     await load()

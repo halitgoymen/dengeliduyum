@@ -11,6 +11,7 @@ export async function GET(req: NextRequest) {
 
   const kategori = req.nextUrl.searchParams.get('kategori')
   const yasGrubu = req.nextUrl.searchParams.get('yasGrubu')
+  const hastaTipi = req.nextUrl.searchParams.get('hastaTipi') || 'tum'
 
   if (!kategori || !yasGrubu)
     return NextResponse.json({ error: 'kategori ve yasGrubu gerekli' }, { status: 400 })
@@ -27,8 +28,11 @@ export async function GET(req: NextRequest) {
     )
     .orderBy(asc(anamnezSorulari.sira))
 
-  // Yaş grubuna göre filtrele (tum veya eşleşen)
-  const filtered = rows.filter(r => r.yasGrubu === 'tum' || r.yasGrubu === yasGrubu)
+  // Yaş grubu ve hasta tipine göre filtrele
+  const filtered = rows.filter(r => 
+    (r.yasGrubu === 'tum' || r.yasGrubu === yasGrubu) &&
+    (r.hastaTipi === 'tum' || r.hastaTipi === hastaTipi)
+  )
 
   return NextResponse.json(filtered)
 }
